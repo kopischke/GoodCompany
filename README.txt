@@ -1,0 +1,7 @@
+GoodCompany is a shell script (and a set of supporting files) aiming to alleviate an annoying bug in Apple’s [FileVault](http://en.wikipedia.org/wiki/FileVault "WikiPedia entry for FileVault") on Mac OS X 10.5 (aka “Leopard”). FileVault is a wonderful solution to secure your home folder under OS X; however, as discussed [here](http://discussions.apple.com/thread.jspa?messageID=5981050&amp;%2323235981050 "Appel Discussions Forums thread") among others, FileVault has a bug when it comes to registering user bindings with OS X’s Launch Services. Default applications set by the user for protocols (like the default web browser, mail application or RSS reader for instance) or for files tend to get lost across logout and reboot, seemingly snapping back to Apple’s defaults.
+
+In fact, they do not: the user bindings are still stored in their configuration file, but for some reason, Leopard often ignores this file while loading a FileVault protected account. This is where GoodCompany comes in, doing what Leopard does not: read the Launch Services user settings file and restore the bindings stored there.
+
+GoodCompany comes with pretty extensive documentation (of which this readme is but a short extract). Check the GoofCompany.html file by opening it directly or doing a `sh GoodCompany.sh -D`.
+
+*Note GoodCompany is not needed in versions of OS X above 10.5, as Apple fixed the bug it tries to alleviate in OS X 10.6.*

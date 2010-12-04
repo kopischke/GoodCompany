@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="Content-Style-Type" content="text/css">
+	<title>GoodCompany Manual</title><!-- version 1.1.2 -->
+	<style type="text/css">
+		body { font-size: 13px;
+			   font-family: "Lucida Grande", "Lucida Sans", Verdana, sans-serif;
+			   font-style: normal; font-weight: normal; text-decoration: none;
+			   line-height: 18px;
+			   margin: 18px auto; 
+			   padding: 0 18px;
+			   max-width: 600px }
+  		div#toc { border: 1px #9fb7d4 solid; background-color: #dae6ff; margin: 18px 0;
+  				  -webkit-border-radius: 9px; -moz-border-radius: 9px; border-radius: 9px }
+		h1 { font-size: 200% }
+		h2 { font-size: 150% }
+		h3 { font-size: 125% }
+		h4 { font-size: 100% }
+		h1, h2, h3, h4 { font-weight: bold; margin-top: 27px; margin-bottom: 0px }
+		p { margin-top: 18px; margin-bottom: 0px }
+		li p { margin-top: inherit }
+		p+p { margin-top: 9px }
+		p.section { margin-top: 18px }
+		ol { list-style-type: decimal; list-style-position: outside; padding-left: 36px }
+		ul { list-style-type: disc; list-style-position: outside; padding-left: 18px }
+		li { margin-top: 9px }
+		ol.tight li+li, ul.tight li+li { margin-top: 0 }
+		table { border: none; padding: 0 }
+		tr { vertical-align: top }
+		tr.section { padding-top: 9px }
+		td+td { padding-left: 18px }
+		a { color: blue }
+		a:link { text-decoration: inherit }		
+		a:visited { color: purple; text-decoration: inherit }
+		a:hover, a:active { text-decoration: underline; border-bottom: none }
+		em, i { font-style: italic }
+		strong, b { font-weight: bold }
+		code { font-size: 90%; font-family: Monaco, "Courier New", Courier, mono }
+		code.command { border: 1px solid silver; padding: 0 3px; }
+	</style>
+</head>
+<body>
+	<h1>GoodCompany</h1>
+	<p><i>Keeping your associations in order &mdash; a companion for FileVault on OS X 10.5</i></p>
+	<div id="toc"><ol class="tight"><li><a href="#intro">Introduction</a> &mdash; what it is about.</li>
+	<li><a href="#usage">Usage</a> &mdash; command line options explained.</li>
+	<li><a href="#package">The package</a> &mdash; getting, installing, uninstalling, version history and caveats.</li>
+	<li><a href="#contact">Contact and support</a> &mdash; including iFAQ&trade;.</li></ol></div>
+	<h2 id="leopard-only">Leopard only</h2>
+	<p><strong>GoodCompany is only needed under OS X 10.5, aka <i>Leopard</i>. Apple introduced the bug GoodCompany tries to alleviate in OS X 10.5, and fixed it in the subsequent OS X release, 10.6, aka <i>Snow Leopard</i>.</strong></p>
+	<p>Note GoodCompany will run under Snow Leopard, but this is only so it can be uninstalled; it has no use whatsoever under that OS version, and athough it will cause no damage, I recommend you <a href="#uninstall">uninstall</a> it as soon as possible to release startup resources.</p>
+	<h2 id="intro">Introduction</h2>
+	<p>GoodCompany is a shell script (and a set of supporting files) aiming to alleviate an annoying bug in Apple&rsquo;s <a href="http://en.wikipedia.org/wiki/FileVault" >FileVault</a>. FileVault is a wonderful solution to secure your home folder under OS X; however, as discussed <a href="http://discussions.apple.com/thread.jspa?messageID=5981050&amp;%2323235981050">here</a> among others, FileVault has a bug when it comes to registering user bindings with OS X&rsquo;s Launch Services. Default application set by the users for protocols (like the default web browser, mail application or RSS reader for instance) or for files tend to get lost over logout and reboots, seemingly snapping back to Apple&rsquo;s defaults.</p>
+	<p>In fact, they do not: the user bindings are still stored in their configuration file, but for some reason, OS X often ignores this file while loading a FileVault protected account. This is where GoodCompany comes in, doing what OS X does not: read the Launch Services user settings file and restore the bindings stored there</p>
+	<h2 id="usage">Usage</h2>
+	<p><b><code class="">sh GoodCompany.sh [ -Fv ] -x action [ -s mode ] [ -t timeout ]</code></b> <br/>executes an action, where <code>action</code> is one of the following:</p>
+	<table><tr><td><code>restore</code></td><td>restore the user bindings stored in the Launch Services configuration file (<code>com.apple.LaunchServices.plist</code>), or in the saved state version fo that file created by the <code>save</code> action (see below) if it is present and readable (if a saved state is present but not readable, GoodCompany falls back on the configuration file; this behavior can be modified with the <code class="command">-s</code> option).</td></tr>
+	<tr><td><code>save</code></td><td>save the bindings stored in the Launch Services configuration file to a saved state file (<code>com.apple.LaunchServices.SavedState.plist</code>). Note the saved state file will persist over <code>restore</code> actions unless you delete it with the <code>clear</code> action, and be picked up by the <code>restore</code> action.</td></tr>
+	<tr><td>clear</td><td>delete the saved state file created by the <code>save</code> action.</td></tr>
+	<tr><td><code>enable</code></td><td>installs a Launch Agent running the <code>restore</code> action at each logon.</td></tr>
+	<tr><td><code>disable</code></td><td>removes the Launch Agent installed by the <code>enable</code> action.</td></tr>
+	<tr><td><code>uninstall</code></td><td>executes a <code>clear</code> action and a <code>disable</code> action in one. If GoodCompany is installed in the user domain (any folder inside the user home folder) or if it is run as <code>root</code>, it  also removes the GoodCompany installation folder.</td></tr></table>
+	<p>the following options modify all actions&rsquo; behavior:</p>
+	<table><tr><td><code>F</code></td><td>do actions only if the user account is protected by FileVault.</td></tr>
+	<tr><td><code>v</code></td><td>verbose output to <code>stdout</code>.</td></tr>
+	<tr><td><code>s</code></td><td>change how the <code>restore</code> action handles the saved Launch Services state saved by the <code>save</code> action. If the mode is <code>ignore</code>, <code>restore</code> will ignore the saved state file even if it is present and readable. If the mode is <code>force</code>, <code>restore</code> will abort if the saved state file is missing or not user readable.</td></tr>
+	<tr><td><code>t</code></td><td>change the default time in seconds <code>restore</code> will wait for <code>lsregister</code> to terminate before aborting to <code>timeout</code></code>.</td></tr></table>
+	<p class="section"><b><code>sh GoodCompany.sh -V | -h | -D [ bundle ]</code></b> will output script information, where:</p>
+	<table><tr><td><code>V</code></td><td>writes the script version number to <code>stdout</code>.</td></tr>
+	<tr><td><code>h</code></td><td>writes the usage statement for the script to <code>stdout</code>.</td></tr>
+	<tr><td><code>D</code></td><td>opens this documentation document. If a bundle identifier is following the option, the documentation will open in the designated application (instead of in <i>Safari</i>, as is default)</td></tr></table>
+	<p class="section"><strong>Requires</strong> OX 10.5 Leopard.</p>
+	<h2 id="package">The package</h2>
+	<h3 id="get">Download</h3>
+	<p>Get the most current version of GoodCompany <a href="https://good-company.s3.amazonaws.com/GoodCompany.zip">here</a>.</p>
+	<h3 id="install">Install</h3>
+	<p>Unzip the archive you downloaded and copy the <code>GoodCompany</code> folder to a location of your choice. If you want GoodCompany to restore your bindings at every logon, open the GoodCompany install folder in Terminal and run the <a href="#usage"><code>enable</code> action</a> once (its is important you run this <strong>from the final install folder, not from the original archive</strong>). Repeat for every user you want to enable GoodCompany for.</p>
+	<h3 id="uninstall">Uninstall</h3>
+	<p>Open the GoodCompany install folder in Terminal and run the <a href="#usage"><code>uninstall</code> action</a>. Note that to remove the Goodcompany folder if it is in a global location, you will have to run the uninstall action as <code>root</code>. If GoodCompany has been enabled for other users from the same global location, be sure to run uninstall once logged in as each of them before you run it as root.</p>
+	<h3 id="versions">Version History</h3>
+	<p><a href="http://search.twitter.com/search?q=&amp;ands=%23goodcompany&amp;from=kopischke&amp;rpp=15" rel="me">Follow GoodCompany development on Twitter</a> by watching my stream for the hash tag <i class="keyword">#goodcompany</i>. Don&rsquo;t worry: this will work even if you have no Twitter account.</p>
+	<table><tr class="section"><td>1.1.2</td><td>Bugfix: fixed version check. GoodCompany will now run on OS X 10.5 and 10.6, instead of refusing to run on these versions (note to self: never do software development while busy on a movie set).
+	<br/>Bugfix: fixed minor typo in uninstall routine which did not affect uninstall proper, but produced an annoying error message.
+	<br/>Bugfix: re-added <code>duti</code> and the folder structure to the distribution package.</td></tr>
+	<tr class="section"><td>1.1.1</td><td>Bugfix: corrected error in version check conditional clause which would cause GoodCompany to abort.
+	<br/>Bugfix: Updated internal version number.<td></td></tr>
+	<tr class="section"><td>1.1.0</td><td>Enhancement: GoodCompany will now also run under OS X 10.6, aka <i>Snow Leopard</i>. This enables uninstalling GoodCompany for those who upgraded to the new OS with GoodCompany still active.
+	<br/>Enhancement: the <a href="#usage"><code>uninstall</code> action</a> will now remove a global GoodCompany installation folder if is run as <code>root</code>. See <a href="#uninstall">unintall section</a>.
+	<br/>Enhancement: check that we can actually <code>sudo</code> when running as <code>root</code>.</td></tr>
+	<tr class="section"><td>1.0.0</td><td>First public release, 1st June 2009</td></tr></table>
+	<h3 id="caveats">Caveats</h3>
+	<p>GoodCompany&rsquo;s limitations lie in the nature of the tools it uses:</p>
+	<ul><li>It relies on a third party tool to reload the bindings proper, Andrew Mortensen&rsquo;s terrific <a href="http://duti.sourceforge.net/"><i>duti</i></a>. As such, it is limited by duti&rsquo;s abilities. Currently, this means only proper OS X file type classes (so-called <a href="http://developer.apple.com/documentation/Carbon/Conceptual/understanding_utis/index.html">UTI</a>s) and protocols (<a href="http://en.wikipedia.org/wiki/URI">URI</a>s) are supported. Setting default handlers by MIME type, by individual suffixes not mapped to an UTI or by creator code is not supported by duti, and hence not by GoodCompany.</li>
+	<li>It has to transform the data stored by Apple in the Launch Services configuration into an XML format readable by duti, using <a href="http://en.wikipedia.org/wiki/XSL_Transformation">XSL Transformation</a>; this is contingent on the format of these entries not deviating in later releases of OS X 10.5, aka <i>Leopard</i>.</li>
+	<li>It is a shell script for <code>bash</code> version 3 and makes use of a lot of external tools installed with OS X; if you have disabled or uninstalled some of these, or replaced them with incompatible versions, the script will fail, though it tries hard to do so gracefully and with a meaningful error message to <code>stderr</code>. The good news is: if you have no idea what I am talking about, that means you will be just fine :).</li>
+	<li>In the same vein, I have gone to some efforts not to make any assumptions about the context GoodCompany runs in: system folder paths are retrieved via AppleScript functions (meaning things should work whatever you told <code>bash</code> about <code>$HOME</code>, or if your home folder name does not match your short user name), the script validates the user context it runs in (which means it should exit unless called from an active local user account), it should take being running with elevated privileges (root) in stride as long as it finds a valid user on the console, symlinks should not irritate it, and permissions are being taken into account. Still, there are so many ways to get a *nixy system like OS X to do things exotic that GoodCompany may still fail unexpectedly. See the previous caveat, and please <a href="#contact">report such cases</a>.</li></ul>
+	<h2 id="contact">Contact and support</h2>
+	<p>Feedback is welcome at <a href="mailto:martin.kopischke@googlemail.com" rel="me">my Gmail address</a>. I might be slow to answer however, as I maintain GoodCompany when, and if, free time allows. Also please keep in mind I am not a developer or IT person &mdash; I created GoodCompany to handle an annoyance on my personal laptop, with the tools I approximately master. Anybody up to creating a better replacement for, or up to add enhancements to GoodCompany, is more than welcome to it!</p>
+	<p>Before contacting me for support, make sure you have read this document, including the <a href="#faq">iFAQ&trade;</a> below. If you contact me for support, please do attach GoodCompany&rsquo;s error log statements (you will find these in Console.app if you use the Launch Agent). Try to describe exactly what you did, and what happened (writing &ldquo;I tried to install your app and it doesn&rsquo;t work, please fix it&rdquo; will not give me much information about how to help you). You can write me in English, German, or even French, and I&rsquo;ll try to answer as soon as my time allows.</p>
+	<h3 id="faq">iFAQ&trade;</h3>
+	<p><b>What are the known bugs?</b> None that I know of. Still, no software system is ever free of bugs (with the possible exception of <i>TeX</i>), and although I did my very best to make GoodCompany robust (see the <a href="#caveats">caveats</a> section above and the answer below this one), I&rsquo;d be very surprised if no bug ever turned up. <a href="#contact">Tell me</a> about the ones you find, and I&rsquo;ll do my best to fix them.</p>
+	<p><b>Can it damage my system?</b> To my best knowledge, no, not ever. GoodCompany only loads the settings already stored by the user, and I have taken great pain to ensure it fails gracefully whenever it has a problem. The worst that should happen is that nothing happens.</p>
+	<p><b>Can you guarantee that?</b> Drop that lawyer and nobody will get hurt :). Seriously, I cannot, how could I? If you insist: &ldquo;I take no liability whatsoever, express or implied for what GodoCompany does on your system&rdquo; &mdash; yadda, yadda, you know the drill.</p>
+	<p><b>Does it modify my system permanently?</b> No it doesn&rsquo;t. <a href="#uninstall">Uninstalling as described</a> will leave your system in the state it was before installing GoodCompany.</p>
+	<p><b>How do I &ldquo;Open a folder in Terminal&rdquo;?</b> Open <i>Terminal.app</i> (it&rsquo;s in your Utilities folder, or can be found by typing &ldquo;Terminal.app&rdquo; in Spotlight). Wait for the prompt. Type <code class="command">cd </code> (with a trailing space). Find the GoodCompany install folder in Finder. Drop the folder into the Terminal window: it should now say <code class="command">cd /path/to/GoodCompany/</code>. Press enter. You can now launch GoodCompany by typing <code class="command">sh GoodCompany.sh</code></p>
+	<p><b>That kind of install procedure is not Mac-like. Why don&rsquo;t you make an installer?</b> Sigh. Because Apple&rsquo;s <i>Package Maker</i> (the official application for creating setup packages under Leopard) sucks. Big time. Among others, it has a bug which precludes selecting a user specific versus a system wide install location on Filevault protected accounts, of all things. I have given up on it and decided to distribute GoodCompany as is until I can figure out something better (<a href="#contact">suggestions are welcome</a>).</p>
+	<p><b>Where do I set the default handlers for URIs / UTIs?</b> That depends. Many applications will allow you to set them as default handlers. The default browser can also be set in <i>Safari</i>, the default mail application in <i>Mail.app</i>, the default RSS reader can be set both in Safari and in Mail.app. To set a default handler for a file type, open the Information panel (<code class="command">Cmd-I</code> in the Finder), choose your application in the &ldquo;Open with&rdquo; dropdown list, and click on &ldquo;Change all&rdquo;.</p>
+	<p><b>I set Something.app to handle .suffix files, and the setting does not stick!</b> .suffix is probably not mapped to an UTI. See the <a href="#caveats">caveats</a> section.</p>
+	<p><b>Ho do I find out if it is?</b> Install <a href="http://www.rubicode.com/Software/RCDefaultApp/"><i>RCDefaultApp</i></a>, open it (it&rsquo;s a System Preferences panel), navigate to the &ldquo;suffix&rdquo; tab, find the extension in its list and see if an UTI is indicated in the bottom right of the information panel.</p>
+	<p><b>I have enabled GoodCompany as per instructions, and UTI and URI settings still do not stick!</b> Your Launch Services settings file might get overwritten by some overeager application in your startup procedure. One notable culprit I know of is <i>iCal</i>. OS X will treat the configuration file as if it was empty if it has not been read on logon, hence setting any binding will void all old settings. Use the <a href="#usage"><code>save</code> action</a> to store the state of your settings before logging out. You can automate this by using a <a href="http://developer.apple.com/documentation/MacOSX/Conceptual/BPSystemStartup/Articles/CustomLogin.html#//apple_ref/doc/uid/20002134-111735">logout hook</a>, but for the time being at least, you are on your own with that.</p>
+	<p><b>My settings file is just fine, but still nothing happens!</b> If you have moved GoodCompany, or have enabled it from a folder that does not exist anymore, the launch Agent that does the automatic <code>restore</code> action is pointing to nothing instead of the GoodCompany script. Try enabling GoodCompany (as described in <a href="#install">the install section</a>) again.</p>
+	<p><b>I did re-enable GoodCompany, and no cigar!</b> GoodCompany waits for OS X to complete Launch Services registration via <code>lsregister</code>, as changing settings while the original registration still runs can have unexpected results. To avoid hanging forever in case something goes wrong with <code>lsregister</code>, it times out after a while (300 seconds = 5 minutes as default). If your machine takes a long time to boot or log on, GoodCompany might time out before <code>lsregister</code> is done. Check the error log (<i>Console.app</i> if you use the Launch Agent) for a message saying &ldquo;Wait for lsregister timed out after X seconds&rdquo;. If you find it, pass a higher timeout value (in seconds) than GoodCompany&rsquo;s default <a href="#usage"><code class="command">-t</code> option</a>.</p>
+	<p><b>I did that too, and still no cigar!</b> You have found a bug. Please open the GoodCompany install folder in Terminal and run GoodCompany once like this: <code class="command">sh GoodCompany.sh -vx restore >GoodCompany.log 2>&amp;1</code>. Send me the <code>GoodCompany.log</code> file you just created <a href="#contac">by email</a>.</p>
+	<p><b>Older settings work fine, but my last changes to Launch Services settings do not stick!</b> Have you been using the<code>save</code> action to store the state of your settings before logging out at some point in the past? If yes, you probably have an outdated saved state file in your system which GoodCompany reads instead of your bona fide <code>Launch Services plist</code>. Run the <a href="#usage"><code>clear</code> action</a> once to clear this.</p>
+	<p><b>Can I restrict GoodCompany to run only on FileVault protected accounts?</b> If you mean administratively, as in starting it in a login hook for all users, <a href="#usage">the <code class="command">-F</code> option</a> is your ticket.</p>
+	<p><b>Why not simply reset launch Services with <code>lsregister</code>?</b> Actually, that is what a previous tool of mine, <i>FileVault Normaliser</i>, did. The only problem is resetting the Launch Services database also resets some flags for applications stored there, notably the one that tells OS X the application has been run before and is safe to be used on an UTI. That means either being bugged by &ldquo;This application has not been run before&rdquo; messages after each reset, or changing  application permissions to <code>root:admin</code> (because apps owned by <code>root</code> are exempt of the warnings &mdash; hey, I didn&rsquo;t invent the OS X security model), which is a very kludgy thing to do, has potential security issues and is not easily rolled back at uninstall.</p>
+	<p><b>Hint x says to do y to get around the bug&hellip;</b> Try your luck. All I know is all hints I read failed for me, except resetting the Launch Services database (see above).</p>
+	<p><b>Why has ist taken Apple a major OS update to fix that bug?</b> I have absolutely no idea. Maybe Apple employees are forbidden to set defaults different from Apple&rsquo;s&hellip; or maybe nobody at Apple uses FileVault.</p>
+	<p><b>How come you fixed it, then?</b> I didn&rsquo;t fix it, I just built a workaround, and half the credit at least is due to Andrew Mortensen, the developper of duti. This being said: because I <em>did</em> both use FileVault and set default applications not made by Apple on OS X 10.5, and did not feel like waiting for the next major update. I&rsquo;m impatient like that.</p>
+	<p><b>Why does the documentation for a tool fixing default bindings load in Safari, even when Safari is not my primary browser?</b> That&rsquo;s a limitation of OS X&rsquo; <code>open</code> command, which will open this document in the default HTML <em>editor</em>. The only way I know of to make sure it loads in the <em>browser</em> is passing <code>open</code> a browser ID, and Safari is part of OS X, hence the choice. If you know a better way let me know. For the time being, you can pass a bundle identifier as argument to the <a href="#usage"><code class="command">-D</code> option</a> to open the documentation in a different application.</p>
+	<p><b>Why does GoodCompany not support OS X version Y?</b> Mainly because it is not needed on any OS X version except 10.5. See <a href="#leopard-only">above</a>.</p>
+	<p><b>The script isn&rsquo;t portable to the csh / ksh / foo shell!</b> Nope, and it never will be, as it is specific to version 3+ of the <code>bash</code>. See the <a href="#caveats">caveats</a> section. I am <em>not</em> studying another shell man page, but feel free to port it if that irks you.</p>
+	<p><b>Your shell coding style is too terse / too verbose / not portable / unusual / unoriginal / plain ugly!</b> Hey, <a href="#contact">contact me</a> with improvement proposals &mdash; I will consider any well reasoned proposal. That is, except the portability stuff, see above.</p>
+	<p><b>Why not use Python / Perl / ObjectiveC?</b> Plain and simple: I don&rsquo;t speak these.</p>
+	<p><b>Can you explain the XSLT part?</b> Magic.</p>
+	<p><b>No, seriously.</b> Seriously, no. Learning XSL is a PITA as I have found no online resource both correct, complete, and easily understood (even by someone reasonably fluent in XML). I am glad I got that part to work, mostly by trial and error (lots of error) in Marc Lyanage&rsquo;s wonderful <a href="http://www.entropy.ch/software/macosx/welcome.html#testxslt">TestXSLT</a>. I won&rsquo;t write tutorials.</p>
+	<p><b>What is iFAQ&trade;?</b> inFrequently Asked Questions.</p>
+	<p><b>That&rsquo;s a trademark?</b> Not really ;).</p>
+	<p class="section"><em>GoodCompany and all its components are a creation by <a href="http://claimid.com/kopischke/" rel="me">Martin Kopischke</a> 2009 and licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0" >Apache License, Version 2.0</a>, except for <i>duti</i>, which is a creation by Andrew Mortensen 2008 and is in the public domain. Though the license does no require it, I&rsquo;d appreciate feedback on code improvements you make.</em></p>
+</body>
+</html>
